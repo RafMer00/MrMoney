@@ -12,7 +12,6 @@ from ntfy_notifier import send_monthly_report
 
 st.set_page_config(page_title="Gestione Finanze", page_icon="💰", layout="wide")
 
-# Scheduler in background per il report via ntfy il 1° del mese alle 08:00
 @st.cache_resource
 def start_scheduler():
     scheduler = BackgroundScheduler()

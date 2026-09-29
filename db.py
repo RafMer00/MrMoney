@@ -24,8 +24,14 @@ def get_initial_balance():
     return 0.0
 
 def set_initial_balance(amount):
-    supabase.table("settings").upsert({"key": "initial_balance", "value": str(amount)}).execute()
-
+    try:
+        supabase.table("settings").upsert(
+            {"key": "initial_balance", "value": str(amount)},
+            on_conflict="key"
+        ).execute()
+    except Exception as e:
+        st.error(f"Errore durante il salvataggio del saldo: {e}")
+        
 def add_category(name):
     clean_name = name.strip()
     if clean_name:
