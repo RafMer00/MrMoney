@@ -3,4 +3,4 @@ pandas
 plotly
 apscheduler
 pyngrok
-python-dotenv
+requests

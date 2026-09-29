@@ -8,7 +8,7 @@ from db import (
     add_category, get_categories, add_transaction,
     get_transactions_df, get_frequent_and_recent_titles
 )
-from mailer import send_monthly_report
+from ntfy_notifier import send_monthly_report
 
 st.set_page_config(page_title="Gestione Finanze", page_icon="💰", layout="wide")
 
