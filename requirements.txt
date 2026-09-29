@@ -1,0 +1,6 @@
+streamlit
+pandas
+plotly
+apscheduler
+pyngrok
+python-dotenv
