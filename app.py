@@ -4,7 +4,7 @@ import plotly.express as px
 from datetime import date
 from apscheduler.schedulers.background import BackgroundScheduler
 from db import (
-    init_db, get_initial_balance, set_initial_balance,
+    get_initial_balance, set_initial_balance,
     add_category, get_categories, add_transaction,
     get_transactions_df, get_frequent_and_recent_titles
 )
@@ -12,9 +12,7 @@ from ntfy_notifier import send_monthly_report
 
 st.set_page_config(page_title="Gestione Finanze", page_icon="💰", layout="wide")
 
-# Inizializza DB e Scheduler background per email il 1° del mese alle 08:00
-init_db()
-
+# Scheduler in background per il report via ntfy il 1° del mese alle 08:00
 @st.cache_resource
 def start_scheduler():
     scheduler = BackgroundScheduler()
@@ -39,7 +37,7 @@ with st.sidebar:
         send_monthly_report()
         st.success("Notifica inviata all'iPhone!")
 
-
+    st.markdown("---")
     st.subheader("Crea Nuova Categoria")
     new_cat = st.text_input("Nome Categoria")
     if st.button("Aggiungi Categoria"):
@@ -47,7 +45,6 @@ with st.sidebar:
             add_category(new_cat)
             st.success(f"Categoria '{new_cat}' aggiunta!")
             st.rerun()
-
 
 # Dati
 df = get_transactions_df()
