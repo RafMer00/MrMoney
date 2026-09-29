@@ -17,21 +17,23 @@ supabase = get_supabase_client()
 def get_initial_balance():
     try:
         res = supabase.table("settings").select("value").eq("key", "initial_balance").execute()
-        if res.data:
+        if res.data and len(res.data) > 0:
             return float(res.data[0]["value"])
     except Exception as e:
-        print(f"Errore lettura saldo: {e}")
+        print(f"Errore lettura saldo iniziale: {e}")
     return 0.0
 
 def set_initial_balance(amount):
     try:
-        supabase.table("settings").upsert(
+        res = supabase.table("settings").upsert(
             {"key": "initial_balance", "value": str(amount)},
             on_conflict="key"
         ).execute()
+        return True
     except Exception as e:
-        st.error(f"Errore durante il salvataggio del saldo: {e}")
-        
+        st.error(f"Errore salvataggio saldo su Supabase: {e}")
+        return False
+            
 def add_category(name):
     clean_name = name.strip()
     if clean_name:

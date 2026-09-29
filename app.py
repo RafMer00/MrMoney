@@ -25,26 +25,33 @@ start_scheduler()
 with st.sidebar:
     st.header("⚙️ Impostazioni")
     current_init_balance = get_initial_balance()
-    new_init_balance = st.number_input("Saldo iniziale (€)", value=current_init_balance, step=50.0)
-    if st.button("Salva Saldo Iniziale"):
-        set_initial_balance(new_init_balance)
-        st.success("Saldo iniziale aggiornato!")
-        st.rerun()
+    
+    new_init_balance = st.number_input(
+        "Saldo iniziale (€)", 
+        value=float(current_init_balance), 
+        step=50.0,
+        key="input_init_balance"
+    )
+    
+    if st.button("Salva Saldo Iniziale", use_container_width=True):
+        if set_initial_balance(new_init_balance):
+            st.success(f"Saldo impostato a € {new_init_balance:,.2f}!")
+            st.rerun()
 
     st.markdown("---")
-    if st.button("📲 Invia Notifica di Test"):
+    if st.button("📲 Invia Notifica di Test", use_container_width=True):
         send_monthly_report()
         st.success("Notifica inviata all'iPhone!")
 
     st.markdown("---")
     st.subheader("Crea Nuova Categoria")
     new_cat = st.text_input("Nome Categoria")
-    if st.button("Aggiungi Categoria"):
+    if st.button("Aggiungi Categoria", use_container_width=True):
         if new_cat:
             add_category(new_cat)
             st.success(f"Categoria '{new_cat}' aggiunta!")
             st.rerun()
-
+            
 # Dati
 df = get_transactions_df()
 total_income = df[df['type'] == 'Entrata']['amount'].sum() if not df.empty else 0.0
