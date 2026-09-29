@@ -34,6 +34,12 @@ with st.sidebar:
         st.success("Saldo iniziale aggiornato!")
         st.rerun()
 
+    st.markdown("---")
+    if st.button("📲 Invia Notifica di Test"):
+        send_monthly_report()
+        st.success("Notifica inviata all'iPhone!")
+
+
     st.subheader("Crea Nuova Categoria")
     new_cat = st.text_input("Nome Categoria")
     if st.button("Aggiungi Categoria"):
@@ -41,6 +47,7 @@ with st.sidebar:
             add_category(new_cat)
             st.success(f"Categoria '{new_cat}' aggiunta!")
             st.rerun()
+
 
 # Dati
 df = get_transactions_df()
