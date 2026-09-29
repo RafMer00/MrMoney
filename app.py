@@ -12,6 +12,7 @@ from ntfy_notifier import send_monthly_report
 
 st.set_page_config(page_title="Gestione Finanze", page_icon="💰", layout="wide")
 
+# Scheduler in background per il report via ntfy il 1° del mese alle 08:00
 @st.cache_resource
 def start_scheduler():
     scheduler = BackgroundScheduler()
@@ -47,11 +48,13 @@ with st.sidebar:
     st.subheader("Crea Nuova Categoria")
     new_cat = st.text_input("Nome Categoria")
     if st.button("Aggiungi Categoria", use_container_width=True):
-        if new_cat:
-            add_category(new_cat)
-            st.success(f"Categoria '{new_cat}' aggiunta!")
+        if new_cat.strip():
+            add_category(new_cat.strip())
+            st.success(f"Categoria '{new_cat.strip()}' aggiunta!")
             st.rerun()
-            
+        else:
+            st.warning("Inserisci un nome valido per la categoria.")
+
 # Dati
 df = get_transactions_df()
 total_income = df[df['type'] == 'Entrata']['amount'].sum() if not df.empty else 0.0
@@ -66,13 +69,13 @@ col3.metric("Totale Spese", f"€ {total_expenses:,.2f}")
 
 tab_insert, tab_stats, tab_advisor = st.tabs(["➕ Registra Spesa/Entrata", "📊 Statistiche & Grafici", "💡 Consulente Risparmio"])
 
-# TAB 1: Inserimento rapido
+# TAB 1: Inserimento rapido con validazione obbligatoria
 with tab_insert:
     st.subheader("Inserisci Movimento")
     c1, c2 = st.columns(2)
     with c1:
         t_type = st.radio("Tipo", ["Uscita", "Entrata"], horizontal=True)
-        t_amount = st.number_input("Importo (€)", min_value=0.01, step=1.0, format="%.2f")
+        t_amount = st.number_input("Importo (€)", min_value=0.0, value=0.0, step=1.0, format="%.2f")
         t_date = st.date_input("Data", value=date.today())
 
     with c2:
@@ -81,16 +84,27 @@ with tab_insert:
         
         st.markdown("**Titoli suggeriti:**")
         selected_hint = st.selectbox("Seleziona da frequenti/recenti:", ["-- Nessuno / Scrivi tu --"] + all_hints)
-        custom_title = st.text_input("Titolo / Descrizione:", value="" if selected_hint.startswith("--") else selected_hint)
+        default_title = "" if selected_hint.startswith("--") else selected_hint
+        custom_title = st.text_input("Titolo / Descrizione:", value=default_title)
         
         categories = get_categories()
-        selected_category = st.selectbox("Categoria", categories)
+        cat_options = ["-- Seleziona una categoria --"] + categories if categories else ["-- Nessuna categoria disponibile --"]
+        selected_category = st.selectbox("Categoria", cat_options)
 
     if st.button("Salva Movimento", use_container_width=True):
-        final_title = custom_title if custom_title else "Senza titolo"
-        add_transaction(str(t_date), t_type, t_amount, final_title, selected_category)
-        st.success("Registrato con successo!")
-        st.rerun()
+        clean_title = custom_title.strip()
+        
+        # Validazioni obbligatorie
+        if t_amount <= 0:
+            st.warning("⚠️ L'importo deve essere una cifra positiva maggiore di 0.")
+        elif not clean_title:
+            st.warning("⚠️ Il titolo/descrizione è obbligatorio.")
+        elif selected_category.startswith("--"):
+            st.warning("⚠️ Devi selezionare una categoria valida.")
+        else:
+            add_transaction(str(t_date), t_type, t_amount, clean_title, selected_category)
+            st.success("Movimento registrato con successo!")
+            st.rerun()
 
     if not df.empty:
         st.markdown("### Ultime transazioni")
